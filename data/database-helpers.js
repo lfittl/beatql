@@ -52,7 +52,7 @@ function determineFields(model, info) {
   return compact(map(Object.keys(getFieldList(info)), f => model.fieldToColumn[f]));
 }
 
-// https://github.com/graphql/graphql-js/issues/96#issuecomment-138134315
+// Heavily inspired by https://github.com/graphql/graphql-js/issues/96#issuecomment-138134315
 function getFieldList(context, asts = context.fieldASTs) {
   if (!Array.isArray(asts)) asts = [asts];
 
@@ -70,7 +70,7 @@ function getFieldList(context, asts = context.fieldASTs) {
             ...getFieldList(context, ast)
           };
         }
-        // We could do a more creative mapping here, but for now just ignore "id" and nested types
+
         if (ast.selectionSet == null) {
           list[ast.name.value] = true;
         }
