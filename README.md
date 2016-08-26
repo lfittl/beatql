@@ -46,6 +46,7 @@ Licensed under the MIT license.
 
 Demo code used from react-music is licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
-Code taken from relay-starter-kit is licensed under the [BSD license](https://github.com/relayjs/relay-starter-kit/blob/master/LICENSE), Copyright (c) 2013-2015, Facebook, Inc. All rights reserved.
+Code taken from relay-starter-kit is licensed under the [BSD license](https://github.com/relayjs/relay-starter-kit/blob/master/LICENSE).<br>
+Copyright (c) 2013-2015, Facebook, Inc. All rights reserved.
 
 See LICENSE file for details.
