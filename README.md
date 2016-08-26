@@ -2,6 +2,8 @@
 
 Demo app that combines react-music, GraphQL and PostgreSQL.
 
+Full background story: https://speakerdeck.com/lfittl/graphql-postgresql-p-dot-s-aka-beatql
+
 ## Getting started
 
 First things first:
