@@ -32,3 +32,20 @@ npm start
 ```
 
 You can then visit http://localhost:5000/ and should hear the demo song :-)
+
+## Authors
+
+Hacked together by [Lukas Fittl](https://github.com/lfittl).
+
+None of this would have been possible without [react-music](https://github.com/FormidableLabs/react-music) made by [Ken Wheeler](https://github.com/kenwheeler).
+
+## LICENSE
+
+Copyright (c) 2016, Lukas Fittl <lukas@fittl.com> <br>
+Licensed under the MIT license.
+
+Demo code used from react-music is licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+Code taken from relay-starter-kit is licensed under the [BSD license](https://github.com/relayjs/relay-starter-kit/blob/master/LICENSE), Copyright (c) 2013-2015, Facebook, Inc. All rights reserved.
+
+See LICENSE file for details.
