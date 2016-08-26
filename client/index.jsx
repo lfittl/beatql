@@ -1,9 +1,14 @@
+import App from './components/App';
+import AppHomeRoute from './routes/AppHomeRoute';
 import React from 'react';
 import ReactDOM from 'react-dom';
-
-import Container from './Container';
+import Relay from 'react-relay';
 
 ReactDOM.render(
-  <Container />,
+  <Relay.Renderer
+    environment={Relay.Store}
+    Container={App}
+    queryConfig={new AppHomeRoute()}
+  />,
   document.getElementById('root')
 );
