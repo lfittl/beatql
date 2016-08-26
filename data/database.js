@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import {simpleLoad, nestedLoader, loaderFirstPass} from './database-helpers';
+import {loadOne, loadMany, loaderFirstPass} from './database-helpers';
 
 var pgp = require('pg-promise')({ promiseLib: Promise });
 
@@ -21,7 +21,7 @@ class Song {
   };
 
   constructor(options) {
-    this.id = options.song_id; // FIXME: Does this need the object type too?
+    this.id = options.song_id;
     this.songId = options.song_id;
     this.tempo = options.tempo;
   }
@@ -41,7 +41,7 @@ class Sequencer {
   };
 
   constructor(options) {
-    this.id = options.sequencer_id; // FIXME: Does this need the object type too?
+    this.id = options.sequencer_id;
     this.sequencerId = options.sequencer_id;
     this.songId = options.song_id;
     this.resolution = options.resolution;
@@ -64,7 +64,7 @@ class Instrument {
   };
 
   constructor(options) {
-    this.id = options.instrument_id; // FIXME: Does this need the object type too?
+    this.id = options.instrument_id;
     this.instrumentId = options.instrument_id;
     this.sequencerId = options.sequencer_id;
     this.instrumentType = options.instrument_type;
@@ -76,12 +76,12 @@ class Instrument {
 
 var db = pgp(dbconfig);
 
-let sequencersLoader = nestedLoader(db, Sequencer);
-let instrumentsLoader = nestedLoader(db, Instrument);
+let sequencersLoader = loadMany(db, Sequencer);
+let instrumentsLoader = loadMany(db, Instrument);
 
 module.exports = {
-  getSong: (id, info) => simpleLoad(db, Song, id, info),
-  getSequencer: (id, info) => simpleLoad(db, Sequencer, id, info),
+  getSong: (id, info) => loadOne(db, Song, id, info),
+  getSequencer: (id, info) => loadOne(db, Sequencer, id, info),
   getSequencersForSong: (obj, info) => sequencersLoader.load(loaderFirstPass(Sequencer, obj, info)),
   getInstrumentsForSequencer: (obj, info) => instrumentsLoader.load(loaderFirstPass(Instrument, obj, info)),
   Song,

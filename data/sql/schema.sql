@@ -24,3 +24,6 @@ CREATE TABLE IF NOT EXISTS instruments(
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE INDEX ON sequencers(song_id);
+CREATE INDEX ON instruments(sequencer_id);

@@ -1,7 +1,7 @@
 import {compact, uniq, flatMap, map, invert} from 'lodash';
 import DataLoader from 'dataloader';
 
-export function simpleLoad(db, model, id, info) {
+export function loadOne(db, model, id, info) {
   let fields = determineFields(model, info);
 
   return new Promise(function(resolve, reject) {
@@ -20,7 +20,7 @@ export function simpleLoad(db, model, id, info) {
   });
 }
 
-export function nestedLoader(db, model) {
+export function loadMany(db, model) {
   return new DataLoader(idsAndFields => {
     var ids = flatMap(idsAndFields, i => i[0]);
     var fields = uniq(flatMap(idsAndFields, i => i[1]));
