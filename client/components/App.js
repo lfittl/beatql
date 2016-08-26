@@ -17,7 +17,7 @@ function renderInstrument(instrument) {
 class SongWrapper extends React.Component {
   render() {
     return (
-      <Song tempo={this.props.song.tempo || 190}>
+      <Song tempo={this.props.song.tempo}>
         {this.props.song.sequencers.edges.map(edge =>
           <Sequencer key={edge.node.id} resolution={edge.node.resolution} bars={edge.node.bars}>
             {edge.node.instruments.edges.map(edge => renderInstrument(edge.node))}
@@ -42,6 +42,7 @@ export default Relay.createContainer(App, {
   fragments: {
     song: () => Relay.QL`
       fragment on Song {
+        tempo
         sequencers(first: 10) {
           edges {
             node {

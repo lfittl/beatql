@@ -23,6 +23,7 @@ class Song {
   constructor(options) {
     this.id = options.song_id; // FIXME: Does this need the object type too?
     this.songId = options.song_id;
+    this.tempo = options.tempo;
   }
 }
 

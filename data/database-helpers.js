@@ -2,14 +2,14 @@ import {compact, uniq, flatMap, map, invert} from 'lodash';
 import DataLoader from 'dataloader';
 
 export function simpleLoad(db, model, id, info) {
-  let fields = determineFields(model, info).join(', ');
+  let fields = determineFields(model, info);
 
   return new Promise(function(resolve, reject) {
     if (!fields) {
       fields = new Array();
     }
     fields.push(model.primaryKey);
-    db.any("SELECT " + fields + " FROM " + model.tableName + " WHERE " + model.primaryKey + " = $1", [id])
+    db.any("SELECT " + fields.join(', ') + " FROM " + model.tableName + " WHERE " + model.primaryKey + " = $1", [id])
       .then(function (data) {
         resolve(new model(data[0]));
       })
