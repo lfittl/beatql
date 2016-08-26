@@ -1,7 +1,8 @@
 import React from 'react';
 import Relay from 'react-relay';
 
-import { Song, Sequencer, Sampler, Synth } from '../Music';
+import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
+import Visualization from './Visualization';
 
 function renderInstrument(instrument) {
   switch (instrument.instrumentType) {
@@ -15,15 +16,45 @@ function renderInstrument(instrument) {
 }
 
 class SongWrapper extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      playing: true,
+    };
+
+    this.handleAudioProcess = this.handleAudioProcess.bind(this);
+    this.handlePlayToggle = this.handlePlayToggle.bind(this);
+  }
+
+  handleAudioProcess(analyser) {
+    this.visualization.audioProcess(analyser);
+  }
+
+  handlePlayToggle() {
+    this.setState({
+      playing: !this.state.playing,
+    });
+  }
+
   render() {
     return (
-      <Song tempo={this.props.song.tempo}>
-        {this.props.song.sequencers.edges.map(edge =>
-          <Sequencer key={edge.node.id} resolution={edge.node.resolution} bars={edge.node.bars}>
-            {edge.node.instruments.edges.map(edge => renderInstrument(edge.node))}
-          </Sequencer>
-        )}
-      </Song>
+      <div>
+        <Song playing={this.state.playing} tempo={this.props.song.tempo}>
+          <Analyser onAudioProcess={this.handleAudioProcess}>
+            {this.props.song.sequencers.edges.map(edge =>
+              <Sequencer key={edge.node.id} resolution={edge.node.resolution} bars={edge.node.bars}>
+                {edge.node.instruments.edges.map(edge => renderInstrument(edge.node))}
+              </Sequencer>
+            )}
+          </Analyser>
+        </Song>
+        <Visualization ref={(c) => { this.visualization = c; }} />
+
+        <button className="react-music-button" type="button" onClick={this.handlePlayToggle}>
+          {this.state.playing ? 'Stop' : 'Play'}
+        </button>
+      </div>
     );
   }
 }

@@ -40,6 +40,7 @@
     "postcss-loader": "^0.10.1",
     "react": "^15.3.1",
     "react-dom": "^15.3.1",
+    "react-music": "^1.0.1",
     "react-relay": "^0.9.2",
     "style-loader": "^0.13.1",
     "web-audio-scheduler": "^1.1.0",
