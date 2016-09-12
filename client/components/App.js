@@ -60,6 +60,14 @@ class SongWrapper extends React.Component {
 }
 
 class App extends React.Component {
+  componentDidMount() {
+    let ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
+
+    ws.onmessage = function (event) {
+      console.log(JSON.parse(event.data));
+    };
+  }
+
   render() {
     return (
       <div>
