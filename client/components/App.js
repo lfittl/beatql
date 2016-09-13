@@ -1,65 +1,19 @@
 import React from 'react';
-import Relay from 'react-relay';
+import { ApolloProvider } from 'react-apollo';
+import ApolloClient, { createNetworkInterface } from 'apollo-client';
 
-import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
-import Visualization from './Visualization';
+import SongWithData from './SongWithData';
 
-function renderInstrument(instrument) {
-  switch (instrument.instrumentType) {
-  case 'Sampler':
-    return <Sampler key={instrument.id} sample={instrument.data.sample} steps={instrument.data.steps} />;
-  case 'Synth':
-    return <Synth key={instrument.id} type={instrument.data.type} volume={instrument.data.volume} envelope={instrument.data.envelope} steps={instrument.data.steps} />;
-  default:
-    console.error('Unknown instrument type: ' + instrument.instrumentType);
-  }
-}
+class App extends React.Component {
+  constructor(...args) {
+    super(...args);
 
-class SongWrapper extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      playing: true,
-    };
-
-    this.handleAudioProcess = this.handleAudioProcess.bind(this);
-    this.handlePlayToggle = this.handlePlayToggle.bind(this);
-  }
-
-  handleAudioProcess(analyser) {
-    this.visualization.audioProcess(analyser);
-  }
-
-  handlePlayToggle() {
-    this.setState({
-      playing: !this.state.playing,
+    this.client = new ApolloClient({
+      networkInterface: createNetworkInterface('http://localhost:5000/graphql'),
+      dataIdFromObject: r => r.id,
     });
   }
 
-  render() {
-    return (
-      <div>
-        <Song playing={this.state.playing} tempo={this.props.song.tempo}>
-          <Analyser onAudioProcess={this.handleAudioProcess}>
-            {this.props.song.sequencers.edges.map(edge =>
-              <Sequencer key={edge.node.id} resolution={edge.node.resolution} bars={edge.node.bars}>
-                {edge.node.instruments.edges.map(edge => renderInstrument(edge.node))}
-              </Sequencer>
-            )}
-          </Analyser>
-        </Song>
-        <Visualization ref={(c) => { this.visualization = c; }} />
-
-        <button className="react-music-button" type="button" onClick={this.handlePlayToggle}>
-          {this.state.playing ? 'Stop' : 'Play'}
-        </button>
-      </div>
-    );
-  }
-}
-
-class App extends React.Component {
   componentDidMount() {
     let ws = new WebSocket(location.origin.replace(/^http/, 'ws'));
 
@@ -70,37 +24,11 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
-        <SongWrapper song={this.props.song} />
-      </div>
+      <ApolloProvider client={this.client}>
+        <SongWithData />
+      </ApolloProvider>
     );
   }
 }
 
-export default Relay.createContainer(App, {
-  fragments: {
-    song: () => Relay.QL`
-      fragment on Song {
-        tempo
-        sequencers(first: 10) {
-          edges {
-            node {
-              id
-              resolution
-              bars
-              instruments(first: 10) {
-                edges {
-                  node {
-                    id
-                    instrumentType
-                    data
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-  },
-});
+export default App;
