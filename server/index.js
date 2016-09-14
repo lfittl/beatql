@@ -4,6 +4,7 @@ import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {Schema} from '../data/schema';
 import {setupDbListener} from '../data/database';
+import DatabasePubSub from '../data/database_pubsub';
 import path from 'path';
 import {PubSub, SubscriptionManager} from 'graphql-subscriptions';
 import {SubscriptionServer} from 'subscriptions-transport-ws';
@@ -25,15 +26,16 @@ httpServer.listen(SERVER_PORT, () => {
   console.log(`Server is now running on http://localhost:${SERVER_PORT}`);
 });
 
-// TODO - Postgres comes here
-const pubsub = new PubSub();
+const pubsub = new DatabasePubSub();
 
 const subscriptionManager = new SubscriptionManager({
   schema: Schema,
   pubsub,
   setupFunctions: {
     songUpdated: (options, args) => ({
-      songUpdated: song => song.id === args.songId,
+      songUpdated: song => {
+        return song.id === args.songId;
+      },
     }),
   },
 });

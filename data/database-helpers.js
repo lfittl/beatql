@@ -11,7 +11,11 @@ export function loadOne(db, model, id, info) {
     fields.push(model.primaryKey);
     db.any("SELECT " + fields.join(', ') + " FROM " + model.tableName + " WHERE " + model.primaryKey + " = $1", [id])
       .then(function (data) {
-        resolve(new model(data[0]));
+        if (data.length == 0) {
+          reject('Record not found');
+        } else {
+          resolve(new model(data[0]));
+        }
       })
       .catch(function (error) {
         console.error(error);

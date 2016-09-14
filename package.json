@@ -37,6 +37,7 @@
     "pg-promise": "^5.3.2",
     "postcss-loader": "^0.10.1",
     "react": "^15.3.1",
+    "react-addons-update": "^15.3.1",
     "react-apollo": "^0.5.5",
     "react-dom": "^15.3.1",
     "react-music": "^1.0.1",

@@ -2,6 +2,7 @@ import React from 'react';
 
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
+import update from 'react-addons-update';
 
 import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
 import Visualization from './Visualization';
@@ -20,6 +21,7 @@ function renderInstrument(instrument) {
 const INITIAL_QUERY = gql`
   query song {
     song {
+      id
       tempo
       sequencers {
         id
@@ -38,6 +40,7 @@ const INITIAL_QUERY = gql`
 const SUBSCRIPTION_QUERY = gql`
   subscription onSongUpdated($songId: String!){
     songUpdated(songId: $songId){
+      id
       tempo
       sequencers {
         id
@@ -87,7 +90,7 @@ class SongWrapper extends React.Component {
       next(data) {
         const newSong = data.songUpdated;
         updateSongQuery((previousResult) => {
-          return update(previousResult, { song: newSong });
+          return update(previousResult, { song: { $set: newSong } });
         });
       },
       error(err) { err.forEach(e => console.error(e)); },
@@ -95,7 +98,7 @@ class SongWrapper extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.loading === false){
+    if (this.props.loading === false) {
       this.subscribe(this.props.song.id, this.props.updateSongQuery);
     }
   }
@@ -117,6 +120,8 @@ class SongWrapper extends React.Component {
 
   render() {
     if (this.props.loading) return <div>Loading...</div>;
+
+    console.log('render with tempo ' + this.props.song.tempo);
 
     return (
       <div>
