@@ -3,7 +3,7 @@ import graphQLHTTP from 'express-graphql';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {Schema} from '../data/schema';
-import {setupDbListener} from '../data/database';
+import {db, Song} from '../data/database';
 import DatabasePubSub from '../data/database_pubsub';
 import path from 'path';
 import {PubSub, SubscriptionManager} from 'graphql-subscriptions';
@@ -26,7 +26,7 @@ httpServer.listen(SERVER_PORT, () => {
   console.log(`Server is now running on http://localhost:${SERVER_PORT}`);
 });
 
-const pubsub = new DatabasePubSub();
+const pubsub = new DatabasePubSub(db, { songs: Song });
 
 const subscriptionManager = new SubscriptionManager({
   schema: Schema,
@@ -41,16 +41,3 @@ const subscriptionManager = new SubscriptionManager({
 });
 
 const subscriptionServer = new SubscriptionServer({ subscriptionManager }, httpServer);
-
-/*const wss = new WebSocketServer({ httpServer });
-
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-  ws.on('close', () => console.log('Client disconnected'));
-});
-
-setupDbListener((data) => {
-  wss.clients.forEach((client) => {
-    client.send(data);
-  });
-});*/

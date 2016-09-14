@@ -20,6 +20,10 @@ class Song {
     updatedAt: 'updated_at',
   };
 
+  static subscriptionTriggers = {
+    UPDATE: 'songUpdated',
+  };
+
   constructor(options) {
     this.id = options.song_id;
     this.songId = options.song_id;
@@ -76,19 +80,6 @@ class Instrument {
 
 var db = pgp(dbconfig);
 
-function setupDbListener(callback) {
-  db.connect({direct: true})
-  .then(sco => {
-    sco.client.on('notification', data => {
-      callback(data.payload);
-    });
-    return sco.none('LISTEN $1~', 'changes');
-  })
-  .catch(error=> {
-    console.log('Error:', error);
-  });
-}
-
 let sequencersLoader = loadMany(db, Sequencer);
 let instrumentsLoader = loadMany(db, Instrument);
 
@@ -97,7 +88,7 @@ module.exports = {
   getSequencer: (id, info) => loadOne(db, Sequencer, id, info),
   getSequencersForSong: (obj, info) => sequencersLoader.load(loaderFirstPass(Sequencer, obj, info)),
   getInstrumentsForSequencer: (obj, info) => instrumentsLoader.load(loaderFirstPass(Instrument, obj, info)),
-  setupDbListener: setupDbListener,
+  db,
   Song,
   Sequencer,
 };
