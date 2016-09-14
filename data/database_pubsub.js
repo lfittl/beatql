@@ -1,5 +1,4 @@
 import {PubSubEngine} from 'graphql-subscriptions/dist/pubsub';
-import uuid from 'node-uuid';
 
 import { keys, values } from 'lodash';
 
@@ -15,11 +14,11 @@ class DatabasePubSub implements PubSubEngine {
       sco.client.on('notification', rawData => {
         const change = JSON.parse(rawData.payload);
         const model = tableToModel[change.table];
-        const trigger = model.subscriptionTriggers[change.action];
+        const trigger = model.subscriptionTriggers && model.subscriptionTriggers[change.action];
 
         if (trigger) {
           const record = new model(change.data);
-          console.log(`Notifying '${trigger}' for ${record.id}`);
+          console.log(`Notifying '${trigger}' with id ${record.id}`);
 
           values(this.subscriptions[trigger]).forEach(onMessage => {
             onMessage({ id: record.id, [trigger]: record });

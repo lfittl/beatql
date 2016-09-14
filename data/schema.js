@@ -28,6 +28,7 @@ var instrumentType = new GraphQLObjectType({
   description: 'An instrument',
   fields: () => ({
     id: { type: GraphQLString, description: 'ID of the instruments' },
+    sequencerId: { type: GraphQLString, description: 'ID of the sequencer the instrument belongs to' },
     instrumentType: { type: GraphQLString, description: 'The type of instrument' },
     data: { type: GraphQLJSON, description: 'The data for the instrument' },
     createdAt: { type: GraphQLInt, description: 'The unix timestamp of when the sequencer was created' },
@@ -40,6 +41,7 @@ var sequencerType = new GraphQLObjectType({
   description: 'A sequencer',
   fields: () => ({
     id: { type: GraphQLString, description: 'ID of the sequencer' },
+    songId: { type: GraphQLString, description: 'ID of the song the sequencer belongs to' },
     resolution: { type: GraphQLInt, description: 'The resolution of the sequencer' },
     bars: { type: GraphQLInt, description: 'The number of bars of the sequencer' },
     createdAt: { type: GraphQLInt, description: 'The unix timestamp of when the sequencer was created' },
@@ -89,9 +91,17 @@ const subscriptionType = new GraphQLObjectType({
   fields: {
     songUpdated: {
       args: { songId: { type: GraphQLString } },
-      type: songType
-    }
-  }
+      type: songType,
+    },
+    sequencerAdded: {
+      args: { songId: { type: GraphQLString } },
+      type: sequencerType,
+    },
+    instrumentAdded: {
+      args: { sequencerId: { type: GraphQLString } },
+      type: instrumentType,
+    },
+  },
 });
 
 export var Schema = new GraphQLSchema({

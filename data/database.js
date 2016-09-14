@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import {loadOne, loadMany, loaderFirstPass} from './database-helpers';
+import DatabasePubSub from './database_pubsub';
 
 var pgp = require('pg-promise')({ promiseLib: Promise });
 
@@ -44,6 +45,10 @@ class Sequencer {
     updatedAt: 'updated_at',
   };
 
+  static subscriptionTriggers = {
+    INSERT: 'sequencerAdded',
+  };
+
   constructor(options) {
     this.id = options.sequencer_id;
     this.sequencerId = options.sequencer_id;
@@ -67,6 +72,10 @@ class Instrument {
     updatedAt: 'updated_at',
   };
 
+  static subscriptionTriggers = {
+    INSERT: 'instrumentAdded',
+  };
+
   constructor(options) {
     this.id = options.instrument_id;
     this.instrumentId = options.instrument_id;
@@ -83,12 +92,14 @@ var db = pgp(dbconfig);
 let sequencersLoader = loadMany(db, Sequencer);
 let instrumentsLoader = loadMany(db, Instrument);
 
+let pubsub = new DatabasePubSub(db, { songs: Song, sequencers: Sequencer, instruments: Instrument });
+
 module.exports = {
   getSong: (id, info) => loadOne(db, Song, id, info),
   getSequencer: (id, info) => loadOne(db, Sequencer, id, info),
   getSequencersForSong: (obj, info) => sequencersLoader.load(loaderFirstPass(Sequencer, obj, info)),
   getInstrumentsForSequencer: (obj, info) => instrumentsLoader.load(loaderFirstPass(Instrument, obj, info)),
-  db,
+  pubsub,
   Song,
   Sequencer,
 };

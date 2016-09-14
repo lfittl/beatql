@@ -3,8 +3,7 @@ import graphQLHTTP from 'express-graphql';
 import webpack from 'webpack';
 import WebpackDevServer from 'webpack-dev-server';
 import {Schema} from '../data/schema';
-import {db, Song} from '../data/database';
-import DatabasePubSub from '../data/database_pubsub';
+import {pubsub} from '../data/database';
 import path from 'path';
 import {PubSub, SubscriptionManager} from 'graphql-subscriptions';
 import {SubscriptionServer} from 'subscriptions-transport-ws';
@@ -26,15 +25,25 @@ httpServer.listen(SERVER_PORT, () => {
   console.log(`Server is now running on http://localhost:${SERVER_PORT}`);
 });
 
-const pubsub = new DatabasePubSub(db, { songs: Song });
-
 const subscriptionManager = new SubscriptionManager({
   schema: Schema,
   pubsub,
   setupFunctions: {
     songUpdated: (options, args) => ({
-      songUpdated: song => {
-        return song.id === args.songId;
+      songUpdated: result => {
+        return result.id === args.songId;
+      },
+    }),
+    sequencerAdded: (options, args) => ({
+      sequencerAdded: result => {
+        return result.sequencerAdded.songId === args.songId;
+      },
+    }),
+    instrumentAdded: (options, args) => ({
+      instrumentAdded: result => {
+        console.log(result);
+        console.log(args);
+        return result.instrumentAdded.sequencerId === args.sequencerId;
       },
     }),
   },
