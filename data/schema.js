@@ -84,6 +84,17 @@ var queryType = new GraphQLObjectType({
   }),
 });
 
+const subscriptionType = new GraphQLObjectType({
+  name: 'Subscription',
+  fields: {
+    songUpdated: {
+      args: { songId: { type: GraphQLString } },
+      type: songType
+    }
+  }
+});
+
 export var Schema = new GraphQLSchema({
   query: queryType,
+  subscription: subscriptionType,
 });

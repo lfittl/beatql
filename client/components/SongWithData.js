@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { graphql } from 'react-apollo';
+import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
@@ -17,6 +17,42 @@ function renderInstrument(instrument) {
   }
 }
 
+const INITIAL_QUERY = gql`
+  query song {
+    song {
+      tempo
+      sequencers {
+        id
+        resolution
+        bars
+        instruments {
+          id
+          instrumentType
+          data
+        }
+      }
+    }
+  }
+`;
+
+const SUBSCRIPTION_QUERY = gql`
+  subscription onSongUpdated($songId: String!){
+    songUpdated(songId: $songId){
+      tempo
+      sequencers {
+        id
+        resolution
+        bars
+        instruments {
+          id
+          instrumentType
+          data
+        }
+      }
+    }
+  }
+`;
+
 class SongWrapper extends React.Component {
   constructor(props) {
     super(props);
@@ -27,6 +63,9 @@ class SongWrapper extends React.Component {
 
     this.handleAudioProcess = this.handleAudioProcess.bind(this);
     this.handlePlayToggle = this.handlePlayToggle.bind(this);
+
+    this.subscriptionObserver = null;
+    this.subscriptionSongId = null;
   }
 
   handleAudioProcess(analyser) {
@@ -37,6 +76,43 @@ class SongWrapper extends React.Component {
     this.setState({
       playing: !this.state.playing,
     });
+  }
+
+  subscribe(songId, updateSongQuery) {
+    this.subscriptionSongId = songId;
+    this.subscriptionObserver = this.props.client.subscribe({
+      query: SUBSCRIPTION_QUERY,
+      variables: { songId },
+    }).subscribe({
+      next(data) {
+        const newSong = data.songUpdated;
+        updateSongQuery((previousResult) => {
+          return update(previousResult, { song: newSong });
+        });
+      },
+      error(err) { err.forEach(e => console.error(e)); },
+    });
+  }
+
+  componentDidMount() {
+    if (this.props.loading === false){
+      this.subscribe(this.props.song.id, this.props.updateSongQuery);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.subscriptionSongId !== nextProps.song.id) {
+      if (this.subscriptionObserver) {
+        this.subscriptionObserver.unsubscribe();
+      }
+      this.subscribe(nextProps.song.id, nextProps.updateSongQuery);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.subscriptionObserver) {
+      this.subscriptionObserver.unsubscribe();
+    }
   }
 
   render() {
@@ -63,29 +139,12 @@ class SongWrapper extends React.Component {
   }
 }
 
-const songQuery = gql`
-  query song {
-    song {
-      tempo
-      sequencers {
-        id
-        resolution
-        bars
-        instruments {
-          id
-          instrumentType
-          data
-        }
-      }
-    }
-  }
-`
-
-const SongWithData = graphql(songQuery, {
-  props: ({data: { loading, song }}) => ({
+const SongWithData = withApollo(graphql(INITIAL_QUERY, {
+  props: ({data: { loading, song, updateQuery }}) => ({
     loading,
     song,
+    updateSongQuery: updateQuery,
   }),
-})(SongWrapper);
+})(SongWrapper));
 
 export default SongWithData;

@@ -5,9 +5,10 @@ import WebpackDevServer from 'webpack-dev-server';
 import {Schema} from '../data/schema';
 import {setupDbListener} from '../data/database';
 import path from 'path';
-import {Server as WebSocketServer} from 'ws';
+import {PubSub, SubscriptionManager} from 'graphql-subscriptions';
+import {SubscriptionServer} from 'subscriptions-transport-ws';
 
-const server = require('http').createServer();
+const httpServer = require('http').createServer();
 const app = express();
 const SERVER_PORT = 5000;
 
@@ -19,12 +20,27 @@ app.use('/graphql', graphQLHTTP({
   schema: Schema,
 }));
 
-server.on('request', app);
-server.listen(SERVER_PORT, () => {
+httpServer.on('request', app);
+httpServer.listen(SERVER_PORT, () => {
   console.log(`Server is now running on http://localhost:${SERVER_PORT}`);
 });
 
-const wss = new WebSocketServer({ server });
+// TODO - Postgres comes here
+const pubsub = new PubSub();
+
+const subscriptionManager = new SubscriptionManager({
+  schema: Schema,
+  pubsub,
+  setupFunctions: {
+    songUpdated: (options, args) => ({
+      songUpdated: song => song.id === args.songId,
+    }),
+  },
+});
+
+const subscriptionServer = new SubscriptionServer({ subscriptionManager }, httpServer);
+
+/*const wss = new WebSocketServer({ httpServer });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
@@ -35,4 +51,4 @@ setupDbListener((data) => {
   wss.clients.forEach((client) => {
     client.send(data);
   });
-});
+});*/
