@@ -77,14 +77,19 @@ class Song extends React.Component {
     if (this.props.loading) return <div>Loading...</div>;
 
     return (
-      <div>
-        {<Player song={this.props.song} />}
+      <div className="container-fluid">
+        <div className="col-md-6">
+          <Player song={this.props.song} />
+        </div>
 
-        {this.props.song.sequencers.map(sequencer =>
-          <Sequencer client={this.props.client} updateQuery={this.props.updateQuery} sequencer={sequencer} key={sequencer.id} />
-        )}
+        <div className="col-md-6">
+          {this.props.song.sequencers.length == 0 && <h3>No sequencers yet</h3>}
+          {this.props.song.sequencers.map(sequencer =>
+            <Sequencer client={this.props.client} updateQuery={this.props.updateQuery} sequencer={sequencer} key={sequencer.id} />
+          )}
 
-        <button onClick={this.handleCreateSequencer.bind(this)}>Create Sequencer</button>
+          <button className="btn btn-success" onClick={this.handleCreateSequencer.bind(this)}>Create Sequencer</button>
+        </div>
       </div>
     );
   }

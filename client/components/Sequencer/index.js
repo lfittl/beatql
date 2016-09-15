@@ -53,7 +53,7 @@ class Sequencer extends React.Component {
 
     return (
       <div>
-        <h2>Sequencer {sequencer.id}</h2>
+        <h3>Sequencer <small>{sequencer.id}</small></h3>
         <div>
           <dt>Bars:</dt>
           <dd>{sequencer.bars}</dd>
@@ -61,12 +61,21 @@ class Sequencer extends React.Component {
           <dd>{sequencer.resolution}</dd>
         </div>
 
-        <h3>Instruments:</h3>
-        {map(sequencer.instruments, instrument => <Instrument instrument={instrument} key={instrument.id} />)}
+        <h4>Instruments:</h4>
+        <div className="well">
+          {map(sequencer.instruments, instrument => <Instrument instrument={instrument} key={instrument.id} />)}
+        </div>
 
-        <button onClick={this.handleCreateInstrument.bind(this, 'Sampler')}>Create Sampler</button>
-        <button onClick={this.handleCreateInstrument.bind(this, 'Synth')}>Create Synth</button>
-        <button onClick={this.handleDelete.bind(this)}>Delete Sequencer</button>
+        <div className="btn-toolbar">
+          <div className="btn-group">
+            <button className="btn btn-success" onClick={this.handleCreateInstrument.bind(this, 'Sampler')}>Create Sampler</button>
+            <button className="btn btn-success" onClick={this.handleCreateInstrument.bind(this, 'Synth')}>Create Synth</button>
+          </div>
+          <div className="btn-group">
+            <button className="btn btn-danger" onClick={this.handleDelete.bind(this)}>Delete Sequencer</button>
+          </div>
+        </div>
+        <hr />
       </div>
     );
   }

@@ -5,7 +5,7 @@
   "main": "server/index.js",
   "scripts": {
     "start": "npm-run-all --parallel start_webpack_dev start_server",
-    "start_webpack_dev": "webpack-dev-server --inline --port 3000 --config webpack.config.dev.js --content-base public/",
+    "start_webpack_dev": "webpack-dev-server --inline --host 0.0.0.0 --port 3000 --config webpack.config.dev.js --content-base public/",
     "start_server": "babel-node server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -27,6 +27,10 @@ class Player extends React.Component {
   }
 
   render() {
+    if (navigator && /Mobi/.test(navigator.userAgent)) {
+      return null;
+    }
+
     return (
       <div>
         <Visualization ref={(c) => { this.visualization = c; }} />

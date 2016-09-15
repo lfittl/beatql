@@ -24,7 +24,7 @@ class Instrument extends React.Component {
 
     return (
       <div>
-        <h3>Instrument {instrument.id} ({instrument.instrumentType})</h3>
+        <h4>{instrument.instrumentType} Instrument <small>{instrument.id}</small></h4>
         <div>
           {map(instrument.data, (v, k) => {
             return (
@@ -35,9 +35,12 @@ class Instrument extends React.Component {
             );
           })}
         </div>
-        <button onClick={this.handleEdit.bind(this)}>Edit</button>
-        <button onClick={this.handleDelete.bind(this)}>Delete</button>
+        <div className="btn-group">
+          <button className="btn btn-primary btn-sm" onClick={this.handleEdit.bind(this)}>Edit</button>
+          <button className="btn btn-danger btn-sm" onClick={this.handleDelete.bind(this)}>Delete</button>
+        </div>
         {this.state.editing && <Form instrument={this.props.instrument} handleSubmit={this.handleSubmit.bind(this)} />}
+        <hr />
       </div>
     );
   }
