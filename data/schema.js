@@ -21,25 +21,35 @@ import {
   getSequencers,
   getSequencersForSong,
   getInstrumentsForSequencer,
+  createInstrument,
+  updateInstrument,
+  deleteInstrument,
 } from './database';
 
 var instrumentType = new GraphQLObjectType({
   name: 'Instrument',
   description: 'An instrument',
-  fields: () => ({
-    id: { type: GraphQLString, description: 'ID of the instruments' },
+  fields: {
+    id: { type: GraphQLString, description: 'ID of the instrument' },
     sequencerId: { type: GraphQLString, description: 'ID of the sequencer the instrument belongs to' },
     instrumentType: { type: GraphQLString, description: 'The type of instrument' },
     data: { type: GraphQLJSON, description: 'The data for the instrument' },
     createdAt: { type: GraphQLInt, description: 'The unix timestamp of when the sequencer was created' },
     updatedAt: { type: GraphQLInt, description: 'The unix timestamp of when the sequencer was last updated' },
-  }),
+  },
+});
+
+var deletedInstrumentType = new GraphQLObjectType({
+   name: 'DeletedInstrument',
+   fields: {
+     id: { type: GraphQLString, description: 'ID of the instrument' },
+   },
 });
 
 var sequencerType = new GraphQLObjectType({
   name: 'Sequencer',
   description: 'A sequencer',
-  fields: () => ({
+  fields: {
     id: { type: GraphQLString, description: 'ID of the sequencer' },
     songId: { type: GraphQLString, description: 'ID of the song the sequencer belongs to' },
     resolution: { type: GraphQLInt, description: 'The resolution of the sequencer' },
@@ -53,13 +63,13 @@ var sequencerType = new GraphQLObjectType({
         return getInstrumentsForSequencer(obj, info);
       },
     },
-  }),
+  },
 });
 
 var songType = new GraphQLObjectType({
   name: 'Song',
   description: 'A song',
-  fields: () => ({
+  fields: {
     id: { type: GraphQLString, description: 'ID of the song' },
     tempo: { type: GraphQLInt, description: 'The tempo of the song' },
     createdAt: { type: GraphQLInt, description: 'The unix timestamp of when the song was created' },
@@ -71,19 +81,46 @@ var songType = new GraphQLObjectType({
         return getSequencersForSong(obj, info);
       },
     },
-  }),
+  },
 });
 
 var queryType = new GraphQLObjectType({
   name: 'Query',
-  fields: () => ({
+  fields: {
     song: {
       type: songType,
       resolve(obj, args, context, info) {
         return getSong('00c60941-3c2f-4935-b2f3-589b4594d302', info);
       },
     },
-  }),
+  },
+});
+
+const mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    createInstrument: {
+      args: { sequencerId: { type: GraphQLString }, instrumentType: { type: GraphQLString }, data: { type: GraphQLJSON } },
+      type: instrumentType,
+      resolve(obj, { sequencerId, instrumentType, data }, context, info) {
+        return createInstrument({ sequencerId, instrumentType, data }, info);
+      }
+    },
+    updateInstrument: {
+      args: { instrumentId: { type: GraphQLString }, data: { type: GraphQLJSON } },
+      type: instrumentType,
+      resolve(obj, { instrumentId, data }, context, info) {
+        return updateInstrument(instrumentId, data, info);
+      }
+    },
+    deleteInstrument: {
+      args: { instrumentId: { type: GraphQLString } },
+      type: deletedInstrumentType,
+      resolve(obj, { instrumentId }, context, info) {
+        return deleteInstrument(instrumentId);
+      }
+    },
+  },
 });
 
 const subscriptionType = new GraphQLObjectType({
@@ -106,5 +143,6 @@ const subscriptionType = new GraphQLObjectType({
 
 export var Schema = new GraphQLSchema({
   query: queryType,
+  mutation: mutationType,
   subscription: subscriptionType,
 });

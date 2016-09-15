@@ -1,36 +1,19 @@
 import React from 'react';
 import update from 'react-addons-update';
 import { graphql, withApollo } from 'react-apollo';
-import { Song, Analyser } from 'react-music';
 
-import { QUERY_SONG, SUBSCRIPTION_SONG_UPDATED, SUBSCRIPTION_SEQUENCER_ADDED, SUBSCRIPTION_INSTRUMENT_ADDED } from './queries';
-import Visualization from './Visualization';
-import Sequencer from './Sequencer';
+import { QUERY_SONG } from '../../api/queries';
+import { SUBSCRIPTION_SONG_UPDATED, SUBSCRIPTION_SEQUENCER_ADDED, SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
+import Sequencer from '../Sequencer';
+import Player from '../Player';
 
-class SongWrapper extends React.Component {
+class Song extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      playing: true,
-    };
-
-    this.handleAudioProcess = this.handleAudioProcess.bind(this);
-    this.handlePlayToggle = this.handlePlayToggle.bind(this);
 
     this.subscriptionObserverSongUpdated = null;
     this.subscriptionObserverSequencerAdded = null;
     this.subscriptionSongId = null;
-  }
-
-  handleAudioProcess(analyser) {
-    this.visualization.audioProcess(analyser);
-  }
-
-  handlePlayToggle() {
-    this.setState({
-      playing: !this.state.playing,
-    });
   }
 
   subscribe(songId, updateQuery) {
@@ -92,18 +75,11 @@ class SongWrapper extends React.Component {
 
     return (
       <div>
-        <Song playing={this.state.playing} tempo={this.props.song.tempo}>
-          <Analyser onAudioProcess={this.handleAudioProcess}>
-            {this.props.song.sequencers.map(sequencer =>
-              <Sequencer client={this.props.client} updateQuery={this.props.updateQuery} sequencer={sequencer} key={sequencer.id} />
-            )}
-          </Analyser>
-        </Song>
-        <Visualization ref={(c) => { this.visualization = c; }} />
+        {<Player song={this.props.song} />}
 
-        <button className="react-music-button" type="button" onClick={this.handlePlayToggle}>
-          {this.state.playing ? 'Stop' : 'Play'}
-        </button>
+        {this.props.song.sequencers.map(sequencer =>
+          <Sequencer client={this.props.client} updateQuery={this.props.updateQuery} sequencer={sequencer} key={sequencer.id} />
+        )}
       </div>
     );
   }
@@ -115,6 +91,6 @@ const SongWithData = withApollo(graphql(QUERY_SONG, {
     updateQuery,
     song,
   }),
-})(SongWrapper));
+})(Song));
 
 export default SongWithData;

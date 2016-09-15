@@ -1,38 +1,88 @@
-import {compact, uniq, flatMap, map, invert} from 'lodash';
+import {compact, uniq, flatMap, map, invert, values} from 'lodash';
 import DataLoader from 'dataloader';
 
 export function loadOne(db, model, id, info) {
-  let fields = determineFields(model, info);
-
   return new Promise(function(resolve, reject) {
+    let fields = determineFields(model, info);
     if (!fields) {
       fields = new Array();
     }
     fields.push(model.primaryKey);
     db.any("SELECT " + fields.join(', ') + " FROM " + model.tableName + " WHERE " + model.primaryKey + " = $1", [id])
-      .then(function (data) {
-        if (data.length == 0) {
-          reject('Record not found');
-        } else {
-          resolve(new model(data[0]));
-        }
-      })
-      .catch(function (error) {
-        console.error(error);
-        reject(error);
-      });
+    .then(data => {
+      if (data.length == 0) {
+        reject('Record not found');
+      } else {
+        resolve(new model(data[0]));
+      }
+    })
+    .catch(function (error) {
+      console.error(error);
+      reject(error);
+    });
+  });
+}
+
+export function createOne(db, model, attrs, info) {
+  return new Promise((resolve, reject) => {
+    let fields = determineFields(model, info);
+    if (!fields) {
+      fields = new Array();
+    }
+    fields.push(model.primaryKey);
+
+    const attrKeys = map(attrs, (_,k) => model.fieldToColumn[k]);
+    const attrValues = values(attrs);
+
+    db.one("INSERT INTO ${table~}(${attrKeys~}) VALUES(${attrValues:csv}) RETURNING ${fields~}", {
+      table: model.tableName, attrValues, attrKeys, fields,
+    })
+    .then(result => {
+      resolve(new model(result));
+    })
+    .catch(error => {
+      console.error(error);
+      reject(error);
+    });
+  });
+}
+
+export function updateOne(db, model, id, attrs, info) {
+  // TODO: Mapping from GraphQL values to database values
+  return new Promise((resolve, reject) => {
+    db.query("UPDATE ${table~} SET data = ${data} WHERE ${idColumn~} = ${id}", { table: model.tableName, data: attrs.data, idColumn: model.primaryKey, id })
+    .then(result => {
+      loadOne(db, model, id, info)
+      .then(record => resolve(record))
+      .catch(error => reject(error));
+    })
+    .catch(error => {
+      console.error(error);
+      reject(error);
+    });
+  });
+}
+
+export function deleteOne(db, model, id) {
+  return new Promise((resolve, reject) => {
+    db.query("DELETE FROM ${table~} WHERE ${idColumn~} = ${id}", { table: model.tableName, idColumn: model.primaryKey, id })
+    .then(() => resolve({ id }))
+    .catch(error => {
+      console.error(error);
+      reject(error);
+    });
   });
 }
 
 export function loadMany(db, model) {
   return new DataLoader(idsAndFields => {
-    var ids = flatMap(idsAndFields, i => i[0]);
-    var fields = uniq(flatMap(idsAndFields, i => i[1]));
-
-    fields.push(model.primaryKey);
-    fields.push(model.foreignKey);
-
     return new Promise(function(resolve, reject) {
+      var ids = flatMap(idsAndFields, i => i[0]);
+      var fields = uniq(flatMap(idsAndFields, i => i[1]));
+
+      fields.push(model.primaryKey);
+      fields.push(model.foreignKey);
+
       db.any("SELECT " + fields.join(', ') + " FROM " + model.tableName + " WHERE " + model.foreignKey + " = ANY($1::uuid[])", [ids])
         .then(function (data) {
           var output = map(idsAndFields, i => {

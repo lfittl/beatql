@@ -41,8 +41,6 @@ const subscriptionManager = new SubscriptionManager({
     }),
     instrumentAdded: (options, args) => ({
       instrumentAdded: result => {
-        console.log(result);
-        console.log(args);
         return result.instrumentAdded.sequencerId === args.sequencerId;
       },
     }),

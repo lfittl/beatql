@@ -34,6 +34,7 @@
     "json-loader": "^0.5.4",
     "lodash": "^4.14.2",
     "note-parser": "^2.0.0",
+    "pg-monitor": "^0.5.11",
     "pg-promise": "^5.3.2",
     "postcss-loader": "^0.10.1",
     "react": "^15.3.1",

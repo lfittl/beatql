@@ -1,8 +1,13 @@
 import Promise from 'bluebird';
-import {loadOne, loadMany, loaderFirstPass} from './database-helpers';
+import {loadOne, loadMany, loaderFirstPass, createOne, updateOne, deleteOne} from './database-helpers';
 import DatabasePubSub from './database_pubsub';
 
-var pgp = require('pg-promise')({ promiseLib: Promise });
+var options = { promiseLib: Promise };
+
+var pgp = require('pg-promise')(options);
+var monitor = require('pg-monitor');
+
+monitor.attach(options);
 
 var dbconfig = {
     host: '192.168.99.100',
@@ -94,11 +99,26 @@ let instrumentsLoader = loadMany(db, Instrument);
 
 let pubsub = new DatabasePubSub(db, { songs: Song, sequencers: Sequencer, instruments: Instrument });
 
+function createInstrument(attrs, info) {
+  return createOne(db, Instrument, attrs, info);
+}
+
+function updateInstrument(id, data, info) {
+  return updateOne(db, Instrument, id, { data }, info);
+}
+
+function deleteInstrument(id) {
+  return deleteOne(db, Instrument, id);
+}
+
 module.exports = {
   getSong: (id, info) => loadOne(db, Song, id, info),
   getSequencer: (id, info) => loadOne(db, Sequencer, id, info),
   getSequencersForSong: (obj, info) => sequencersLoader.load(loaderFirstPass(Sequencer, obj, info)),
   getInstrumentsForSequencer: (obj, info) => instrumentsLoader.load(loaderFirstPass(Instrument, obj, info)),
+  createInstrument,
+  updateInstrument,
+  deleteInstrument,
   pubsub,
   Song,
   Sequencer,

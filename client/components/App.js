@@ -5,7 +5,7 @@ import ApolloClient, { createNetworkInterface } from 'apollo-client';
 import { Client } from 'subscriptions-transport-ws';
 import addGraphQLSubscriptions from '../util/subscriptions';
 
-import SongWithData from './SongWithData';
+import Song from './Song';
 
 class App extends React.Component {
   constructor(...args) {
@@ -25,7 +25,7 @@ class App extends React.Component {
   render() {
     return (
       <ApolloProvider client={this.client}>
-        <SongWithData />
+        <Song />
       </ApolloProvider>
     );
   }
