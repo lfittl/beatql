@@ -1,10 +1,10 @@
 import React from 'react';
 import { map } from 'lodash';
 
-import { MUTATION_CREATE_INSTRUMENT } from '../../api/mutations';
+import { MUTATION_CREATE_INSTRUMENT, MUTATION_DELETE_SEQUENCER } from '../../api/mutations';
 import { SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
 import Instrument from '../Instrument';
-import { addInstrumentToSong } from '../../reducers';
+import { addInstrumentToSong, deleteSequencerFromSong } from '../../reducers';
 import { withMutations } from '../../util/mutations';
 
 class Sequencer extends React.Component {
@@ -66,12 +66,17 @@ class Sequencer extends React.Component {
 
         <button onClick={this.handleCreateInstrument.bind(this, 'Sampler')}>Create Sampler</button>
         <button onClick={this.handleCreateInstrument.bind(this, 'Synth')}>Create Synth</button>
+        <button onClick={this.handleDelete.bind(this)}>Delete Sequencer</button>
       </div>
     );
   }
 
   handleCreateInstrument(instrumentType) {
     this.props.createInstrument(this.props.sequencer.id, instrumentType, {});
+  }
+
+  handleDelete() {
+    this.props.deleteSequencer(this.props.sequencer.id);
   }
 }
 
@@ -83,6 +88,17 @@ const SequencerWithMutations = withMutations(Sequencer, {
       updateQueries: {
         song: (prev, { mutationResult }) => {
           return addInstrumentToSong(prev, mutationResult.data.createInstrument);
+        },
+      },
+    }),
+  },
+  deleteSequencer: {
+    gql: MUTATION_DELETE_SEQUENCER,
+    prop: (mutate, sequencerId) => mutate({
+      variables: { sequencerId },
+      updateQueries: {
+        song: (prev, { mutationResult }) => {
+          return deleteSequencerFromSong(prev, mutationResult.data.deleteSequencer);
         },
       },
     }),

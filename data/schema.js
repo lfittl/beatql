@@ -22,6 +22,8 @@ import {
   createInstrument,
   updateInstrument,
   deleteInstrument,
+  createSequencer,
+  deleteSequencer,
 } from './database';
 
 var instrumentType = new GraphQLObjectType({
@@ -62,6 +64,13 @@ var sequencerType = new GraphQLObjectType({
       },
     },
   },
+});
+
+var deletedSequencerType = new GraphQLObjectType({
+   name: 'DeletedSequencer',
+   fields: {
+     id: { type: GraphQLString, description: 'ID of the sequencer' },
+   },
 });
 
 var songType = new GraphQLObjectType({
@@ -117,6 +126,20 @@ const mutationType = new GraphQLObjectType({
       type: deletedInstrumentType,
       resolve(obj, { instrumentId }, context, info) {
         return deleteInstrument(instrumentId);
+      }
+    },
+    createSequencer: {
+      args: { songId: { type: GraphQLString }, resolution: { type: GraphQLInt }, bars: { type: GraphQLInt } },
+      type: sequencerType,
+      resolve(obj, { songId, resolution, bars }, context, info) {
+        return createSequencer({ songId, resolution, bars }, info);
+      }
+    },
+    deleteSequencer: {
+      args: { sequencerId: { type: GraphQLString } },
+      type: deletedSequencerType,
+      resolve(obj, { sequencerId }, context, info) {
+        return deleteSequencer(sequencerId);
       }
     },
   },
