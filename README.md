@@ -1,6 +1,10 @@
 # BeatQL
 
+![](https://d17oy1vhnax1f7.cloudfront.net/items/3m1F25150d0a1g012a08/Screen%20Shot%202016-09-15%20at%2012.50.07%20PM%201.png)
+
 Demo app that combines react-music, GraphQL and PostgreSQL.
+
+It also shows off GraphQL mutations and subscriptions, based on [Apollo Client](https://github.com/apollostack/apollo-client).
 
 Full background story: https://speakerdeck.com/lfittl/graphql-postgresql-p-dot-s-aka-beatql
 
@@ -18,13 +22,19 @@ Then, boot up a PostgreSQL database and load the data structure:
 
 ```
 docker-compose up -d db
-psql -h `docker-machine ip` -U beatql -f data/sql/schema.sql
+psql -h `docker-machine ip` -U beatql -f data/sql/00_schema.sql
 ```
 
 Next, lets load the song from the [react-music demo](https://github.com/FormidableLabs/react-music/blob/master/demo/index.js):
 
 ```
-psql -h `docker-machine ip` -U beatql -f data/sql/sample_song.sql
+psql -h `docker-machine ip` -U beatql -f data/sql/01_sample_song.sql
+```
+
+In addition, run the following to enable LISTEN/NOTIFY for powering GraphQL subscriptions:
+
+```
+psql -h `docker-machine ip` -U beatql -f data/sql/02_notify.sql
 ```
 
 Start the server:
