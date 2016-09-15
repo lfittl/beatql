@@ -1,32 +1,11 @@
 import React from 'react';
-import update from 'react-addons-update';
 import { findIndex, map, some } from 'lodash';
 import { graphql } from 'react-apollo';
 
 import { MUTATION_CREATE_INSTRUMENT } from '../../api/mutations';
 import { SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
 import Instrument from '../Instrument';
-
-function addInstrumentToSong(prev, instrument) {
-  const sequencerIdx = findIndex(prev.song.sequencers, s => s.id == instrument.sequencerId);
-
-  // This will be called twice when we're notified of our own mutations
-  if (some(prev.song.sequencers[sequencerIdx].instruments, i => i.id == instrument.id)) {
-    return prev;
-  }
-
-  return update(prev, {
-    song: {
-      sequencers: {
-        [sequencerIdx]: {
-          instruments: {
-            $unshift: [instrument],
-          },
-        },
-      },
-    },
-  });
-}
+import { addInstrumentToSong } from '../../reducers';
 
 class Sequencer extends React.Component {
   constructor(props) {

@@ -1,9 +1,10 @@
 import React from 'react';
 import { cloneDeep, map, reject } from 'lodash';
-import { graphql } from 'react-apollo';
 
 import Form from './Form';
 import { MUTATION_UPDATE_INSTRUMENT, MUTATION_DELETE_INSTRUMENT } from '../../api/mutations';
+import { deleteInstrumentFromSong } from '../../reducers';
+import { withMutations } from '../../util/mutations';
 
 class Instrument extends React.Component {
   state: {
@@ -55,30 +56,24 @@ class Instrument extends React.Component {
   }
 }
 
-const InstrumentWithMutation = graphql(MUTATION_UPDATE_INSTRUMENT, {
-  props: ({ mutate }) => ({
-    updateInstrument: (instrumentId, data) => mutate({ variables: { instrumentId, data } }),
-  }),
-})(Instrument);
-
-const InstrumentWithMutation2 = graphql(MUTATION_DELETE_INSTRUMENT, {
-  props: ({ mutate }) => ({
-    deleteInstrument: (instrumentId) => mutate({
+const InstrumentWithMutations = withMutations(Instrument, {
+  updateInstrument: {
+    gql: MUTATION_UPDATE_INSTRUMENT,
+    prop: (mutate, instrumentId, data) => mutate({
+      variables: { instrumentId, data }
+    }),
+  },
+  deleteInstrument: {
+    gql: MUTATION_DELETE_INSTRUMENT,
+    prop: (mutate, instrumentId) => mutate({
       variables: { instrumentId },
       updateQueries: {
         song: (prev, { mutationResult }) => {
-          const deletedId = mutationResult.data.deleteInstrument.id;
-          let next = cloneDeep(prev);
-
-          prev.song.sequencers.forEach(sequencer => {
-            sequencer.instruments = reject(sequencer.instruments, instrument => instrument.id == deletedId);
-          });
-
-          return prev;
+          return deleteInstrumentFromSong(prev, mutationResult.data.deleteInstrument);
         },
       },
     }),
-  }),
-})(InstrumentWithMutation);
+  },
+});
 
-export default InstrumentWithMutation2;
+export default InstrumentWithMutations;

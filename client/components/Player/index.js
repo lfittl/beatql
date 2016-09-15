@@ -1,4 +1,5 @@
 import React from 'react';
+import { isEmpty } from 'lodash';
 import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
 
 import Visualization from './Visualization';
@@ -48,6 +49,10 @@ class Player extends React.Component {
   }
 
   renderInstrument(instrument) {
+    if (isEmpty(instrument.data)) {
+      return null;
+    }
+
     switch (instrument.instrumentType) {
     case 'Sampler':
       return <Sampler key={instrument.id} sample={instrument.data.sample} steps={instrument.data.steps} />;
