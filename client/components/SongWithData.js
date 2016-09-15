@@ -1,30 +1,18 @@
 import React from 'react';
-
-import { graphql, withApollo } from 'react-apollo';
 import update from 'react-addons-update';
-
-import { Song, Analyser, Sequencer, Sampler, Synth } from 'react-music';
+import { graphql, withApollo } from 'react-apollo';
+import { Song, Analyser } from 'react-music';
 
 import { QUERY_SONG, SUBSCRIPTION_SONG_UPDATED, SUBSCRIPTION_SEQUENCER_ADDED, SUBSCRIPTION_INSTRUMENT_ADDED } from './queries';
 import Visualization from './Visualization';
-
-function renderInstrument(instrument) {
-  switch (instrument.instrumentType) {
-  case 'Sampler':
-    return <Sampler key={instrument.id} sample={instrument.data.sample} steps={instrument.data.steps} />;
-  case 'Synth':
-    return <Synth key={instrument.id} type={instrument.data.type} volume={instrument.data.volume} envelope={instrument.data.envelope} steps={instrument.data.steps} />;
-  default:
-    console.error('Unknown instrument type: ' + instrument.instrumentType);
-  }
-}
+import Sequencer from './Sequencer';
 
 class SongWrapper extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      playing: false, // true,
+      playing: true,
     };
 
     this.handleAudioProcess = this.handleAudioProcess.bind(this);
@@ -32,7 +20,6 @@ class SongWrapper extends React.Component {
 
     this.subscriptionObserverSongUpdated = null;
     this.subscriptionObserverSequencerAdded = null;
-    this.subscriptionObserverInstrumentAdded = null;
     this.subscriptionSongId = null;
   }
 
@@ -72,28 +59,6 @@ class SongWrapper extends React.Component {
       },
       error(err) { err.forEach(e => console.error(e)) },
     });
-
-    this.subscriptionObserverInstrumentAdded = this.props.client.subscribe({
-      query: SUBSCRIPTION_INSTRUMENT_ADDED,
-      variables: { songId },
-    }).subscribe({
-      next(data) {
-        console.log("Instrument added");
-        console.log(data);
-        updateQuery((previousResult) => {
-          return update(previousResult, {
-            song: {
-              sequencers: {
-                [data.instrumentAdded.sequencerId]: {
-                  $unshift: [data.instrumentAdded],
-                },
-              },
-            },
-          });
-        });
-      },
-      error(err) { err.forEach(e => console.error(e)) },
-    });
   }
 
   unsubscribe() {
@@ -102,9 +67,6 @@ class SongWrapper extends React.Component {
     }
     if (this.subscriptionObserverSequencerAdded) {
       this.subscriptionObserverSequencerAdded.unsubscribe();
-    }
-    if (this.subscriptionObserverInstrumentAdded) {
-      this.subscriptionObserverInstrumentAdded.unsubscribe();
     }
   }
 
@@ -128,16 +90,12 @@ class SongWrapper extends React.Component {
   render() {
     if (this.props.loading) return <div>Loading...</div>;
 
-    console.log('render with tempo ' + this.props.song.tempo);
-
     return (
       <div>
         <Song playing={this.state.playing} tempo={this.props.song.tempo}>
           <Analyser onAudioProcess={this.handleAudioProcess}>
             {this.props.song.sequencers.map(sequencer =>
-              <Sequencer key={sequencer.id} resolution={sequencer.resolution} bars={sequencer.bars}>
-                {sequencer.instruments.map(instrument => renderInstrument(instrument))}
-              </Sequencer>
+              <Sequencer client={this.props.client} updateQuery={this.props.updateQuery} sequencer={sequencer} key={sequencer.id} />
             )}
           </Analyser>
         </Song>
