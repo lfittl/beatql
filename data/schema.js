@@ -13,8 +13,6 @@ import {
 import GraphQLJSON from 'graphql-type-json';
 
 import {
-  Song,
-  Sequencer,
   getSong,
   getRandomSong,
   getSequencer,
@@ -88,9 +86,10 @@ var queryType = new GraphQLObjectType({
   name: 'Query',
   fields: {
     song: {
+      args: { songId: { type: GraphQLString } },
       type: songType,
       resolve(obj, args, context, info) {
-        return getSong('00c60941-3c2f-4935-b2f3-589b4594d302', info);
+        return getSong(args.songId, info);
       },
     },
   },

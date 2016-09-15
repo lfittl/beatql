@@ -86,7 +86,8 @@ class Song extends React.Component {
 }
 
 const SongWithData = withApollo(graphql(QUERY_SONG, {
-  props: ({data: { loading, updateQuery, song }}) => ({
+  options: ({ songId }) => ({ variables: { songId } }),
+  props: ({ data: { loading, updateQuery, song } }) => ({
     loading,
     updateQuery,
     song,

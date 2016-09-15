@@ -1,11 +1,11 @@
 import React from 'react';
-import { findIndex, map, some } from 'lodash';
-import { graphql } from 'react-apollo';
+import { map } from 'lodash';
 
 import { MUTATION_CREATE_INSTRUMENT } from '../../api/mutations';
 import { SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
 import Instrument from '../Instrument';
 import { addInstrumentToSong } from '../../reducers';
+import { withMutations } from '../../util/mutations';
 
 class Sequencer extends React.Component {
   constructor(props) {
@@ -75,9 +75,10 @@ class Sequencer extends React.Component {
   }
 }
 
-const SequencerWithMutation = graphql(MUTATION_CREATE_INSTRUMENT, {
-  props: ({ mutate }) => ({
-    createInstrument: (sequencerId, instrumentType, data) => mutate({
+const SequencerWithMutations = withMutations(Sequencer, {
+  createInstrument: {
+    gql: MUTATION_CREATE_INSTRUMENT,
+    prop: (mutate, sequencerId, instrumentType, data) => mutate({
       variables: { sequencerId, instrumentType, data },
       updateQueries: {
         song: (prev, { mutationResult }) => {
@@ -85,7 +86,7 @@ const SequencerWithMutation = graphql(MUTATION_CREATE_INSTRUMENT, {
         },
       },
     }),
-  }),
-})(Sequencer);
+  },
+});
 
-export default SequencerWithMutation;
+export default SequencerWithMutations;

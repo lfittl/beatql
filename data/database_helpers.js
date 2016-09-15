@@ -48,9 +48,13 @@ export function createOne(db, model, attrs, info) {
 }
 
 export function updateOne(db, model, id, attrs, info) {
-  // TODO: Mapping from GraphQL values to database values
   return new Promise((resolve, reject) => {
-    db.query("UPDATE ${table~} SET data = ${data} WHERE ${idColumn~} = ${id}", { table: model.tableName, data: attrs.data, idColumn: model.primaryKey, id })
+    const attrKeys = map(attrs, (_,k) => model.fieldToColumn[k]);
+    const attrValues = values(attrs);
+
+    db.query("UPDATE ${table~} SET (${attrKeys~}) = (${attrValues:csv}) WHERE ${idColumn~} = ${id}", {
+      table: model.tableName, idColumn: model.primaryKey, id, attrValues, attrKeys,
+    })
     .then(result => {
       loadOne(db, model, id, info)
       .then(record => resolve(record))

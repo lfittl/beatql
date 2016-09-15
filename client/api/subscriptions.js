@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 
 export const SUBSCRIPTION_SONG_UPDATED = gql`
   subscription onSongUpdated($songId: String!) {
-    songUpdated(songId: $songId){
+    songUpdated(songId: $songId) {
       id
       tempo
       sequencers {

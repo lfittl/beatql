@@ -25,7 +25,7 @@ class App extends React.Component {
   render() {
     return (
       <ApolloProvider client={this.client}>
-        <Song />
+        <Song songId="00c60941-3c2f-4935-b2f3-589b4594d302" />
       </ApolloProvider>
     );
   }
