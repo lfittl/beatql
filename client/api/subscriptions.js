@@ -35,6 +35,30 @@ export const SUBSCRIPTION_SEQUENCER_ADDED = gql`
   }
 `;
 
+export const SUBSCRIPTION_SEQUENCER_UPDATED = gql`
+  subscription onSequencerUpdated($sequencerId: String!) {
+    sequencerUpdated(sequencerId: $sequencerId){
+      id
+      songId
+      resolution
+      bars
+      instruments {
+        id
+        instrumentType
+        data
+      }
+    }
+  }
+`;
+
+export const SUBSCRIPTION_SEQUENCER_DELETED = gql`
+  subscription onSequencerDeleted($sequencerId: String!) {
+    sequencerDeleted(sequencerId: $sequencerId){
+      id
+    }
+  }
+`;
+
 export const SUBSCRIPTION_INSTRUMENT_ADDED = gql`
   subscription onInstrumentAdded($sequencerId: String!) {
     instrumentAdded(sequencerId: $sequencerId){
@@ -42,6 +66,25 @@ export const SUBSCRIPTION_INSTRUMENT_ADDED = gql`
       sequencerId
       instrumentType
       data
+    }
+  }
+`;
+
+export const SUBSCRIPTION_INSTRUMENT_UPDATED = gql`
+  subscription onInstrumentUpdated($instrumentId: String!) {
+    instrumentUpdated(instrumentId: $instrumentId){
+      id
+      sequencerId
+      instrumentType
+      data
+    }
+  }
+`;
+
+export const SUBSCRIPTION_INSTRUMENT_DELETED = gql`
+  subscription onInstrumentDeleted($instrumentId: String!) {
+    instrumentDeleted(instrumentId: $instrumentId){
+      id
     }
   }
 `;

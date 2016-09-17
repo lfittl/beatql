@@ -22,6 +22,20 @@ export function addInstrumentToSong(prev, instrument) {
   });
 }
 
+export function updateInstrumentInSong(prev, newInstrument) {
+  let next = cloneDeep(prev);
+
+  next.song.sequencers.forEach(sequencer => {
+    sequencer.instruments.forEach((instrument, index) => {
+      if (instrument.id == newInstrument.id) {
+        sequencer.instruments[index] = newInstrument;
+      }
+    });
+  });
+
+  return next;
+}
+
 export function deleteInstrumentFromSong(prev, instrument) {
   let next = cloneDeep(prev);
 
@@ -39,6 +53,18 @@ export function addSequencerToSong(prev, sequencer) {
   }
 
   return update(prev, { song: { sequencers: { $unshift: [sequencer] } } });
+}
+
+export function updateSequencerInSong(prev, newSequencer) {
+  let next = cloneDeep(prev);
+
+  next.song.sequencers.forEach((sequencer, index) => {
+    if (sequencer.id == newSequencer.id) {
+      next.song.sequencers[index] = newSequencer;
+    }
+  });
+
+  return next;
 }
 
 export function deleteSequencerFromSong(prev, sequencer) {

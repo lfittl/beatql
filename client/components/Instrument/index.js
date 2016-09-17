@@ -3,7 +3,8 @@ import { cloneDeep, map, reject } from 'lodash';
 
 import Form from './Form';
 import { MUTATION_UPDATE_INSTRUMENT, MUTATION_DELETE_INSTRUMENT } from '../../api/mutations';
-import { deleteInstrumentFromSong } from '../../reducers';
+import { SUBSCRIPTION_INSTRUMENT_UPDATED, SUBSCRIPTION_INSTRUMENT_DELETED } from '../../api/subscriptions';
+import { updateInstrumentInSong, deleteInstrumentFromSong } from '../../reducers';
 import { withMutations } from '../../util/mutations';
 
 class Instrument extends React.Component {
@@ -14,9 +15,57 @@ class Instrument extends React.Component {
   constructor(props) {
     super(props);
 
+    this.subscriptionObserverInstrumentUpdated = null;
+    this.subscriptionObserverInstrumentDeleted = null;
+    this.subscriptionInstrumentId = null;
+
     this.state = {
       editing: false,
     };
+  }
+
+  subscribe(instrumentId, updateQuery) {
+    this.subscriptionInstrumentId = instrumentId;
+
+    this.subscriptionObserverInstrumentUpdated = this.props.client.subscribe({
+      query: SUBSCRIPTION_INSTRUMENT_UPDATED,
+      variables: { instrumentId },
+    }).subscribe({
+      next(data) { updateQuery(prev => updateInstrumentInSong(prev, data.instrumentUpdated)) },
+      error(err) { err.forEach(e => console.error(e)) },
+    });
+
+    this.subscriptionObserverInstrumentDeleted = this.props.client.subscribe({
+      query: SUBSCRIPTION_INSTRUMENT_DELETED,
+      variables: { instrumentId },
+    }).subscribe({
+      next(data) { updateQuery(prev => deleteInstrumentFromSong(prev, data.instrumentDeleted)) },
+      error(err) { err.forEach(e => console.error(e)) },
+    });
+  }
+
+  unsubscribe() {
+    if (this.subscriptionObserverInstrumentUpdated) {
+      this.subscriptionObserverInstrumentUpdated.unsubscribe();
+    }
+    if (this.subscriptionObserverInstrumentDeleted) {
+      this.subscriptionObserverInstrumentDeleted.unsubscribe();
+    }
+  }
+
+  componentDidMount() {
+    this.subscribe(this.props.instrument.id, this.props.updateQuery);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.subscriptionInstrumentId !== nextProps.instrument.id) {
+      this.unsubscribe();
+      this.subscribe(nextProps.instrument.id, nextProps.updateQuery);
+    }
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
   }
 
   render() {

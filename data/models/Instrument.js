@@ -14,6 +14,8 @@ class Instrument {
 
   static subscriptionTriggers = {
     INSERT: 'instrumentAdded',
+    UPDATE: 'instrumentUpdated',
+    DELETE: 'instrumentDeleted',
   };
 
   constructor(options) {

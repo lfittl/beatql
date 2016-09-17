@@ -13,6 +13,8 @@ class Sequencer {
 
   static subscriptionTriggers = {
     INSERT: 'sequencerAdded',
+    UPDATE: 'sequencerUpdated',
+    DELETE: 'sequencerDeleted',
   };
 
   constructor(options) {

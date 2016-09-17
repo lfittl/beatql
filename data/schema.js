@@ -156,9 +156,25 @@ const subscriptionType = new GraphQLObjectType({
       args: { songId: { type: GraphQLString } },
       type: sequencerType,
     },
+    sequencerUpdated: {
+      args: { sequencerId: { type: GraphQLString } },
+      type: sequencerType,
+    },
+    sequencerDeleted: {
+      args: { sequencerId: { type: GraphQLString } },
+      type: deletedSequencerType,
+    },
     instrumentAdded: {
       args: { sequencerId: { type: GraphQLString } },
       type: instrumentType,
+    },
+    instrumentUpdated: {
+      args: { instrumentId: { type: GraphQLString } },
+      type: instrumentType,
+    },
+    instrumentDeleted: {
+      args: { instrumentId: { type: GraphQLString } },
+      type: deletedInstrumentType,
     },
   },
 });

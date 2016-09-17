@@ -2,9 +2,9 @@ import React from 'react';
 import { map } from 'lodash';
 
 import { MUTATION_CREATE_INSTRUMENT, MUTATION_DELETE_SEQUENCER } from '../../api/mutations';
-import { SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
+import { SUBSCRIPTION_INSTRUMENT_ADDED, SUBSCRIPTION_SEQUENCER_UPDATED, SUBSCRIPTION_SEQUENCER_DELETED } from '../../api/subscriptions';
 import Instrument from '../Instrument';
-import { addInstrumentToSong, deleteSequencerFromSong } from '../../reducers';
+import { addInstrumentToSong, updateSequencerInSong, deleteSequencerFromSong } from '../../reducers';
 import { withMutations } from '../../util/mutations';
 
 class Sequencer extends React.Component {
@@ -12,7 +12,9 @@ class Sequencer extends React.Component {
     super(props);
 
     this.subscriptionObserverInstrumentAdded = null;
-    this.subscriptionInstrumentId = null;
+    this.subscriptionObserverSequencerUpdated = null;
+    this.subscriptionObserverSequencerDeleted = null;
+    this.subscriptionSequencerId = null;
   }
 
   subscribe(sequencerId, updateQuery) {
@@ -25,11 +27,33 @@ class Sequencer extends React.Component {
       next(data) { updateQuery(prev => addInstrumentToSong(prev, data.instrumentAdded)) },
       error(err) { err.forEach(e => console.error(e)) },
     });
+
+    this.subscriptionObserverSequencerUpdated = this.props.client.subscribe({
+      query: SUBSCRIPTION_SEQUENCER_UPDATED,
+      variables: { sequencerId },
+    }).subscribe({
+      next(data) { updateQuery(prev => updateSequencerInSong(prev, data.sequencerUpdated)) },
+      error(err) { err.forEach(e => console.error(e)) },
+    });
+
+    this.subscriptionObserverSequencerDeleted = this.props.client.subscribe({
+      query: SUBSCRIPTION_SEQUENCER_DELETED,
+      variables: { sequencerId },
+    }).subscribe({
+      next(data) { updateQuery(prev => deleteSequencerFromSong(prev, data.sequencerDeleted)) },
+      error(err) { err.forEach(e => console.error(e)) },
+    });
   }
 
   unsubscribe() {
     if (this.subscriptionObserverInstrumentAdded) {
       this.subscriptionObserverInstrumentAdded.unsubscribe();
+    }
+    if (this.subscriptionObserverSequencerUpdated) {
+      this.subscriptionObserverSequencerUpdated.unsubscribe();
+    }
+    if (this.subscriptionObserverSequencerDeleted) {
+      this.subscriptionObserverSequencerDeleted.unsubscribe();
     }
   }
 
@@ -63,7 +87,7 @@ class Sequencer extends React.Component {
 
         <h4>Instruments:</h4>
         <div className="well">
-          {map(sequencer.instruments, instrument => <Instrument instrument={instrument} key={instrument.id} />)}
+          {map(sequencer.instruments, instrument => <Instrument client={this.props.client} instrument={instrument} key={instrument.id} updateQuery={this.props.updateQuery} />)}
         </div>
 
         <div className="btn-toolbar">
