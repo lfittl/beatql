@@ -10,7 +10,7 @@ import {SubscriptionServer} from 'subscriptions-transport-ws';
 
 const httpServer = require('http').createServer();
 const app = express();
-const SERVER_PORT = 5000;
+const SERVER_PORT = process.env.PORT || 5000;
 
 app.use('/', express.static(path.resolve(__dirname, '..', 'public')));
 

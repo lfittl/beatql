@@ -10,9 +10,12 @@
   <body>
     <div id="root"></div>
     <script>
-      var hostname = location.hostname;
-      document.write("<" + "script src=\"http://" + hostname + ":3000/webpack-dev-server.js\"></" + "script>");
-      document.write("<" + "script src=\"http://" + hostname + ":3000/bundle.js\"></" + "script>");
+      if (location.port == 5000) { // Development uses webpack-dev-server
+        document.write("<" + "script src=\"http://" + location.hostname + ":3000/webpack-dev-server.js\"></" + "script>");
+        document.write("<" + "script src=\"http://" + location.hostname + ":3000/bundle.js\"></" + "script>");
+      } else {
+        document.write("<" + "script src=\"/bundle.js\"></" + "script>");
+      }
     </script>
   </body>
 </html>

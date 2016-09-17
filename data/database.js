@@ -13,12 +13,18 @@ var monitor = require('pg-monitor');
 
 monitor.attach(options);
 
-var dbconfig = {
+var dbconfig;
+
+if (process.env.DATABASE_URL) {
+  dbconfig = process.env.DATABASE_URL;
+} else {
+  dbconfig = {
     host: '192.168.99.100',
     port: 5432,
     database: 'beatql',
     user: 'beatql',
-};
+  };
+}
 
 var db = pgp(dbconfig);
 
