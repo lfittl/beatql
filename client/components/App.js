@@ -1,15 +1,21 @@
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import ApolloClient, { createNetworkInterface } from 'apollo-client';
-
+import { Router, browserHistory } from 'react-router';
 import { Client } from 'subscriptions-transport-ws';
+
 import addGraphQLSubscriptions from '../util/subscriptions';
+import routes from '../routes';
 
 import Song from './Song';
+import SongList from './SongList';
+
+const PAGE_SONG_LIST = 'PAGE_SONG_LIST';
+const PAGE_SONG_DETAILS = 'PAGE_SONG_DETAILS';
 
 class App extends React.Component {
-  constructor(...args) {
-    super(...args);
+  constructor(props) {
+    super(props);
 
     const wsClient = new Client(location.origin.replace(/^http/, 'ws'));
 
@@ -25,7 +31,9 @@ class App extends React.Component {
   render() {
     return (
       <ApolloProvider client={this.client}>
-        <Song songId="00c60941-3c2f-4935-b2f3-589b4594d302" />
+        <Router history={browserHistory}>
+          {routes}
+        </Router>
       </ApolloProvider>
     );
   }

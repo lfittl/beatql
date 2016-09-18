@@ -14,11 +14,11 @@ import GraphQLJSON from 'graphql-type-json';
 
 import {
   getSong,
-  getRandomSong,
-  getSequencer,
-  getSequencers,
+  getSongList,
   getSequencersForSong,
   getInstrumentsForSequencer,
+  createSong,
+  deleteSong,
   createInstrument,
   updateInstrument,
   deleteInstrument,
@@ -91,6 +91,13 @@ var songType = new GraphQLObjectType({
   },
 });
 
+var deletedSongType = new GraphQLObjectType({
+   name: 'DeletedSong',
+   fields: {
+     id: { type: GraphQLString, description: 'ID of the song' },
+   },
+});
+
 var queryType = new GraphQLObjectType({
   name: 'Query',
   fields: {
@@ -101,12 +108,32 @@ var queryType = new GraphQLObjectType({
         return getSong(args.songId, info);
       },
     },
+    songList: {
+      type: new GraphQLList(songType),
+      resolve(obj, args, context, info) {
+        return getSongList(info);
+      },
+    }
   },
 });
 
 const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
+    createSong: {
+      args: { tempo: { type: GraphQLInt } },
+      type: songType,
+      resolve(obj, { tempo }, context, info) {
+        return createSong({ tempo }, info);
+      }
+    },
+    deleteSong: {
+      args: { songId: { type: GraphQLString } },
+      type: deletedSongType,
+      resolve(obj, { songId }, context, info) {
+        return deleteSong(songId);
+      }
+    },
     createInstrument: {
       args: { sequencerId: { type: GraphQLString }, instrumentType: { type: GraphQLString }, data: { type: GraphQLJSON } },
       type: instrumentType,

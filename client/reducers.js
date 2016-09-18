@@ -1,6 +1,25 @@
 import update from 'react-addons-update';
 import { findIndex, map, some, reject, cloneDeep } from 'lodash';
 
+export function addSongToSongList(prev, song) {
+  // This will be called twice when we're notified of our own mutations
+  if (some(prev.songList, i => i.id == song.id)) {
+    return prev;
+  }
+
+  return update(prev, {
+    songList: {
+      $unshift: [song],
+    },
+  });
+}
+
+export function deleteSongFromSongList(prev, song) {
+  let next = cloneDeep(prev);
+  next.songList = reject(next.songList, s => s.id == song.id);
+  return next;
+}
+
 export function addInstrumentToSong(prev, instrument) {
   const sequencerIdx = findIndex(prev.song.sequencers, s => s.id == instrument.sequencerId);
 

@@ -44,6 +44,7 @@
     "react-apollo": "^0.5.5",
     "react-dom": "^15.3.1",
     "react-music": "^1.0.1",
+    "react-router": "^2.8.1",
     "style-loader": "^0.13.1",
     "subscriptions-transport-ws": "^0.2.2",
     "utf-8-validate": "^1.2.1",

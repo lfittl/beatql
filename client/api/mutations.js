@@ -1,5 +1,21 @@
 import gql from 'graphql-tag';
 
+export const MUTATION_CREATE_SONG = gql`
+  mutation createSong($tempo: Int!) {
+    createSong(tempo: $tempo) {
+      id
+    }
+  }
+`;
+
+export const MUTATION_DELETE_SONG = gql`
+  mutation deleteSong($songId: String!) {
+    deleteSong(songId: $songId) {
+      id
+    }
+  }
+`;
+
 export const MUTATION_CREATE_INSTRUMENT = gql`
   mutation createInstrument($sequencerId: String!, $instrumentType: String!, $data: JSON!) {
     createInstrument(sequencerId: $sequencerId, instrumentType: $instrumentType, data: $data) {

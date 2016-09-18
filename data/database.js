@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import {loadOne, loadMany, loaderFirstPass, createOne, updateOne, deleteOne} from './database_helpers';
+import {loadOne, loadAll, loadMany, loaderFirstPass, createOne, updateOne, deleteOne} from './database_helpers';
 import DatabasePubSub from './database_pubsub';
 
 import Instrument from './models/Instrument';
@@ -35,9 +35,11 @@ let pubsub = new DatabasePubSub(db, { songs: Song, sequencers: Sequencer, instru
 
 module.exports = {
   getSong: (id, info) => loadOne(db, Song, id, info),
-  getSequencer: (id, info) => loadOne(db, Sequencer, id, info),
+  getSongList: (info) => loadAll(db, Song, info),
   getSequencersForSong: (obj, info) => sequencersLoader.load(loaderFirstPass(Sequencer, obj, info)),
   getInstrumentsForSequencer: (obj, info) => instrumentsLoader.load(loaderFirstPass(Instrument, obj, info)),
+  createSong: (attrs, info) => createOne(db, Song, attrs, info),
+  deleteSong: (id) => deleteOne(db, Song, id),
   createInstrument: (attrs, info) => createOne(db, Instrument, attrs, info),
   updateInstrument: (id, data, info) => updateOne(db, Instrument, id, { data }, info),
   deleteInstrument: (id) => deleteOne(db, Instrument, id),

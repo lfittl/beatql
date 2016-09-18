@@ -19,6 +19,12 @@ app.use('/graphql', graphQLHTTP({
   schema: Schema,
 }));
 
+app.use(express.static(__dirname + '/public'));
+
+app.get('*', (request, response) => {
+  response.sendfile('./public/index.html');
+});
+
 httpServer.on('request', app);
 httpServer.listen(SERVER_PORT, () => {
   console.log(`Server is now running on http://localhost:${SERVER_PORT}`);

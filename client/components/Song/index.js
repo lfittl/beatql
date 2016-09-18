@@ -1,12 +1,13 @@
 import React from 'react';
 import update from 'react-addons-update';
 import { graphql, withApollo } from 'react-apollo';
+import { withRouter } from 'react-router';
 
 import { QUERY_SONG } from '../../api/queries';
-import { MUTATION_CREATE_SEQUENCER } from '../../api/mutations';
+import { MUTATION_CREATE_SEQUENCER, MUTATION_DELETE_SONG } from '../../api/mutations';
 import { SUBSCRIPTION_SONG_UPDATED, SUBSCRIPTION_SEQUENCER_ADDED, SUBSCRIPTION_INSTRUMENT_ADDED } from '../../api/subscriptions';
 import { withMutations } from '../../util/mutations';
-import { addSequencerToSong } from '../../reducers';
+import { addSequencerToSong, deleteSongFromSongList, deleteSong } from '../../reducers';
 import Sequencer from '../Sequencer';
 import Player from '../Player';
 
@@ -63,9 +64,15 @@ class Song extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.subscriptionSongId !== nextProps.song.id) {
-      this.unsubscribe();
-      this.subscribe(nextProps.song.id, nextProps.updateQuery);
+    if (nextProps.error) {
+      if (nextProps.error.message == 'GraphQL error: Record not found') {
+        this.props.router.push('/');
+      }
+    } else {
+      if (this.subscriptionSongId !== nextProps.song.id) {
+        this.unsubscribe();
+        this.subscribe(nextProps.song.id, nextProps.updateQuery);
+      }
     }
   }
 
@@ -74,10 +81,14 @@ class Song extends React.Component {
   }
 
   render() {
+    if (this.props.error) {
+      return <div className="alert alert-danger">{this.props.error.message}</div>;
+    }
+
     if (this.props.loading) return <div>Loading...</div>;
 
     return (
-      <div className="container-fluid">
+      <div>
         <div className="col-md-6">
           <Player song={this.props.song} />
         </div>
@@ -89,13 +100,19 @@ class Song extends React.Component {
           )}
 
           <button className="btn btn-success" onClick={this.handleCreateSequencer.bind(this)}>Create Sequencer</button>
+          <button className="btn btn-danger" onClick={this.handleDeleteSong.bind(this)}>Delete Song</button>
         </div>
       </div>
     );
   }
 
-  handleCreateSequencer(instrumentType) {
+  handleCreateSequencer() {
     this.props.createSequencer(this.props.song.id, 16, 4);
+  }
+
+  handleDeleteSong() {
+    this.props.deleteSong(this.props.song.id);
+    this.props.router.push('/');
   }
 }
 
@@ -111,15 +128,27 @@ const SongWithMutations = withMutations(Song, {
       },
     }),
   },
+  deleteSong: {
+    gql: MUTATION_DELETE_SONG,
+    prop: (mutate, songId) => mutate({
+      variables: { songId },
+      updateQueries: {
+        songList: (prev, { mutationResult }) => {
+          return deleteSongFromSongList(prev, mutationResult.data.deleteSong);
+        },
+      }
+    })
+  }
 });
 
-const SongWithDataAndMutations = withApollo(graphql(QUERY_SONG, {
-  options: ({ songId }) => ({ variables: { songId } }),
-  props: ({ data: { loading, updateQuery, song } }) => ({
+const SongWithDataAndMutations = withRouter(withApollo(graphql(QUERY_SONG, {
+  options: ({ params }) => ({ variables: { songId: params.songId } }),
+  props: ({ data: { loading, updateQuery, song, error } }) => ({
     loading,
     updateQuery,
     song,
+    error,
   }),
-})(SongWithMutations));
+})(SongWithMutations)));
 
 export default SongWithDataAndMutations;

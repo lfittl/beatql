@@ -31,12 +31,21 @@ export function createOne(db, model, attrs, info) {
     }
     fields.push(model.primaryKey);
 
-    const attrKeys = map(attrs, (_,k) => model.fieldToColumn[k]);
-    const attrValues = values(attrs);
+    let queryResult = null;
+    if (Object.keys(attrs).length == 0) {
+      queryResult = db.one("INSERT INTO ${table~} DEFAULT VALUES RETURNING ${fields~}", {
+        table: model.tableName, fields,
+      })
+    } else {
+      const attrKeys = map(attrs, (_,k) => model.fieldToColumn[k]);
+      const attrValues = values(attrs);
 
-    db.one("INSERT INTO ${table~}(${attrKeys~}) VALUES(${attrValues:csv}) RETURNING ${fields~}", {
-      table: model.tableName, attrValues, attrKeys, fields,
-    })
+      queryResult = db.one("INSERT INTO ${table~}(${attrKeys~}) VALUES(${attrValues:csv}) RETURNING ${fields~}", {
+        table: model.tableName, attrValues, attrKeys, fields,
+      })
+    }
+
+    queryResult
     .then(result => {
       resolve(new model(result));
     })
@@ -72,6 +81,26 @@ export function deleteOne(db, model, id) {
     db.query("DELETE FROM ${table~} WHERE ${idColumn~} = ${id}", { table: model.tableName, idColumn: model.primaryKey, id })
     .then(() => resolve({ id }))
     .catch(error => {
+      console.error(error);
+      reject(error);
+    });
+  });
+}
+
+export function loadAll(db, model, info) {
+  return new Promise(function(resolve, reject) {
+    let fields = determineFields(model, info);
+    if (!fields) {
+      fields = new Array();
+    }
+    fields.push(model.primaryKey);
+    db.any("SELECT ${fields~} FROM ${table~}", {
+      fields: fields.join(', '), table: model.tableName,
+    })
+    .then(data => {
+      resolve(map(data, d => new model(d)));
+    })
+    .catch(function (error) {
       console.error(error);
       reject(error);
     });

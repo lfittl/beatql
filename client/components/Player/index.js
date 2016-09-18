@@ -17,7 +17,9 @@ class Player extends React.Component {
   }
 
   handleAudioProcess(analyser) {
-    this.visualization.audioProcess(analyser);
+    if (this.visualization) {
+      this.visualization.audioProcess(analyser);
+    }
   }
 
   handlePlayToggle() {
